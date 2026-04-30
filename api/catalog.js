@@ -15,12 +15,17 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Extract the path after /api/catalog/
-    // e.g., /api/catalog/partners/urn:partner:xxx/products?gtin=123
-    const requestPath = req.url.replace(/^\/api\/catalog\/?/, '');
+    // Get the full request URL and parse it
+    // In production: /api/catalog?path=/partners/urn:partner:xxx/products&gtin=123
+    const { path, ...queryParams } = req.query;
     
-    // Build the full URL
-    const fullUrl = `${CATALOG_API_BASE}/${requestPath}`;
+    if (!path) {
+      return res.status(400).json({ error: 'Missing path parameter' });
+    }
+    
+    // Build query string
+    const queryString = new URLSearchParams(queryParams).toString();
+    const fullUrl = `${CATALOG_API_BASE}${path}${queryString ? `?${queryString}` : ''}`;
     
     console.log('Proxying request to:', fullUrl);
 

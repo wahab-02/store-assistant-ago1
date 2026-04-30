@@ -78,7 +78,15 @@ export async function fetchProductByGtin(gtin) {
   try {
     console.log("🔍 Fetching product for GTIN:", gtin);
     
-    const url = `${CATALOG_API_BASE}/partners/${CATALOG_PARTNER_URN}/products?gtin=${gtin}`;
+    // Build URL differently for dev vs production
+    let url;
+    if (import.meta.env.MODE === 'development') {
+      // Dev: use Vite proxy
+      url = `${CATALOG_API_BASE}/partners/${CATALOG_PARTNER_URN}/products?gtin=${gtin}`;
+    } else {
+      // Production: use Vercel serverless function with path as query param
+      url = `${CATALOG_API_BASE}?path=/partners/${CATALOG_PARTNER_URN}/products&gtin=${gtin}`;
+    }
     
     const response = await fetch(url, {
       method: "GET",
