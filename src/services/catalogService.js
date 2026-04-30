@@ -1,7 +1,7 @@
 // Catalog Manager API service
 const CATALOG_API_BASE = import.meta.env.MODE === 'development' 
   ? "/api/catalog" // Proxied through Vite in dev
-  : "http://catalog-manager.yellowsmoke-ff36206d.uksouth.azurecontainerapps.io/v1"; // Direct in production
+  : "/api/catalog"; // Vercel serverless function in production
 
 const CATALOG_PARTNER_URN = "urn:partner:OVwjjT3vylY";
 
