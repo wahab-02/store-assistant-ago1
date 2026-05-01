@@ -1,9 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { B, T1, G, T2 } from "../constants/colors";
 
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
-
 function DateOCRScanner({ onDateScanned, onClose }) {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -12,6 +9,12 @@ function DateOCRScanner({ onDateScanned, onClose }) {
   const [status, setStatus] = useState("initializing");
   const [detectedText, setDetectedText] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+
+  // Check API key is available
+  const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+  if (!GEMINI_API_KEY) {
+    console.error("VITE_GEMINI_API_KEY is not set");
+  }
 
   useEffect(() => {
     let mounted = true;
@@ -32,19 +35,6 @@ function DateOCRScanner({ onDateScanned, onClose }) {
     };
   }, []);
 
-  const captureFrame = () => {
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    if (!video || !canvas || !video.videoWidth) return null;
-
-    // Smaller image = fewer tokens = less quota usage
-    canvas.width = 640;
-    canvas.height = Math.round((video.videoHeight / video.videoWidth) * 640);
-    canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    return canvas.toDataURL("image/jpeg", 0.75).split(",")[1];
-  };
-
   const scanWithGemini = async () => {
     if (scanningRef.current) return;
     scanningRef.current = true;
@@ -52,6 +42,13 @@ function DateOCRScanner({ onDateScanned, onClose }) {
     setDetectedText("Preparing image…");
 
     try {
+      // Check API key
+      if (!GEMINI_API_KEY) {
+        setDetectedText("API key not configured");
+        console.error("Gemini API key is missing");
+        return;
+      }
+
       const canvas = canvasRef.current;
       if (!canvas) {
         setDetectedText("Camera not ready");
@@ -164,6 +161,8 @@ Rules:
         }
       };
 
+      const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+      
       const response = await fetch(GEMINI_URL, {
         method: "POST",
         headers: {
