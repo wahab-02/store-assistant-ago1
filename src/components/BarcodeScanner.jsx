@@ -202,13 +202,16 @@ export function BarcodeScanner({ licenseKey, isActive, onBarcodeScanned, onClose
   }, []);
 
   return (
-    <div style={{ position: "relative", flex: 1, overflow: "hidden" }}>
+    <div
+      className="scandit-scanner-root"
+      style={{ position: "relative", width: "100%", height: "100%", minHeight: "300px", overflow: "hidden" }}
+    >
       <div
         ref={containerRef}
         style={{
           width: "100%",
           height: "100%",
-          minHeight: "400px",
+          minHeight: "300px",
           background: "#000",
           position: "relative",
           overflow: "hidden"

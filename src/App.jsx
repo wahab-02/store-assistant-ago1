@@ -15,20 +15,6 @@ import CommsWrite from "./screens/CommsWrite";
 import CommsActive from "./screens/CommsActive";
 import RMDashboard from "./screens/RMDashboard";
 
-// Navigation configuration
-const NAV = [
-  { id: "home", l: "Home", g: "sm" },
-  { id: "qc-scan", l: "QC: Scan", g: "sm" },
-  { id: "qc-mechanic", l: "QC: Mechanic", g: "sm" },
-  { id: "qc-bestbefore", l: "QC: Best Before", g: "sm" },
-  { id: "qc-details", l: "QC: Cap & Time", g: "sm" },
-  { id: "qc-group", l: "QC: Audience", g: "sm" },
-  { id: "qc-review", l: "QC: Review", g: "sm" },
-  { id: "qc-status", l: "Live Status", g: "sm" },
-  { id: "comms-write", l: "Store Comms", g: "sm" },
-  { id: "comms-active", l: "Comms Active", g: "sm" },
-  { id: "rm-dashboard", l: "RM Dashboard", g: "rm" },
-];
 
 export default function App() {
   const [screen, setScreen] = useState("home");
@@ -47,7 +33,6 @@ export default function App() {
     }
   };
   
-  const isRM = screen === "rm-dashboard";
   const p = { go, back };
   
   const render = () => {
@@ -82,96 +67,8 @@ export default function App() {
   return (
     <ProductProvider>
       <Globals />
-      <div style={{
-        minHeight: "100vh",
-        background: "#0A0A0A",
-        display: "flex",
-        flexDirection: "column"
-      }}>
-
-        {/* Content */}
-        <div style={{
-          flex: 1,
-          display: "flex",
-          alignItems: isRM ? "flex-start" : "center",
-          justifyContent: "center",
-          padding: isRM ? 0 : "32px 24px"
-        }}>
-          {isRM ? (
-            <div style={{ width: "100%" }}>{render()}</div>
-          ) : (
-            <div style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 20
-            }}>
-              <div style={{
-                width: 375,
-                height: 780,
-                borderRadius: 52,
-                background: "#fff",
-                overflow: "hidden",
-                display: "flex",
-                flexDirection: "column",
-                position: "relative",
-                boxShadow: `0 0 0 1px rgba(255,255,255,0.05), 0 0 0 10px #1C1C1E,
-                  0 0 0 11px rgba(255,255,255,0.07), 0 50px 140px rgba(0,0,0,0.85)`
-              }}>
-                {/* Phone detail buttons */}
-                {[
-                  [
-                    {
-                      position: "absolute",
-                      right: -3,
-                      top: 120,
-                      width: 4,
-                      height: 64,
-                      background: "#2C2C2E",
-                      borderRadius: "0 2px 2px 0"
-                    }
-                  ],
-                  [
-                    {
-                      position: "absolute",
-                      left: -3,
-                      top: 96,
-                      width: 4,
-                      height: 44,
-                      background: "#2C2C2E",
-                      borderRadius: "2px 0 0 2px"
-                    }
-                  ],
-                  [
-                    {
-                      position: "absolute",
-                      left: -3,
-                      top: 152,
-                      width: 4,
-                      height: 64,
-                      background: "#2C2C2E",
-                      borderRadius: "2px 0 0 2px"
-                    }
-                  ],
-                  [
-                    {
-                      position: "absolute",
-                      left: -3,
-                      top: 228,
-                      width: 4,
-                      height: 64,
-                      background: "#2C2C2E",
-                      borderRadius: "2px 0 0 2px"
-                    }
-                  ]
-                ].map((s, i) => (
-                  <div key={i} style={s[0]} />
-                ))}
-                {render()}
-              </div>
-            </div>
-          )}
-        </div>
+      <div style={{ height: "100%", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+        {render()}
       </div>
     </ProductProvider>
   );

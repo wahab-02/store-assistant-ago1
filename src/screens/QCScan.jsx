@@ -68,6 +68,8 @@ function QCScan({ go, back }) {
       display: "flex",
       flexDirection: "column",
       flex: 1,
+      minHeight: 0,
+      height: "100%",
       background: mode === "scan" ? "#000" : BG,
       overflow: "hidden"
     }}>
@@ -76,18 +78,22 @@ function QCScan({ go, back }) {
       <Steps total={6} current={0} />
       
       {mode === "scan" ? (
-        <>
+        <div style={{ flex: 1, position: "relative", minHeight: 0, overflow: "hidden" }}>
           <BarcodeScanner
             isActive={mode === "scan"}
             licenseKey={import.meta.env.VITE_SCANDIT_LICENSE_KEY}
             onBarcodeScanned={handleBarcodeScanned}
             onClose={() => setMode("search")}
           />
-          
+
           <div style={{
-            background: "#000",
+            position: "absolute",
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "rgba(0,0,0,0.9)",
             padding: "14px 20px 28px",
-            borderTop: "1px solid rgba(255,255,255,0.07)",
+            borderTop: "1px solid rgba(255,255,255,0.15)",
             display: "flex",
             flexDirection: "column",
             gap: 12
@@ -96,7 +102,7 @@ function QCScan({ go, back }) {
               className="press"
               onClick={() => handleBarcodeScanned("400580824600")}
               style={{
-                background: "rgba(255,255,255,0.12)",
+                background: "rgba(255,255,255,0.16)",
                 backdropFilter: "blur(20px)",
                 border: "1px solid rgba(255,255,255,0.18)",
                 borderRadius: 980,
@@ -111,7 +117,7 @@ function QCScan({ go, back }) {
               style={{
                 background: "none",
                 border: "none",
-                color: "rgba(255,255,255,0.4)",
+                color: "rgba(255,255,255,0.6)",
                 fontSize: 15,
                 fontWeight: 500,
                 width: "100%",
@@ -120,7 +126,7 @@ function QCScan({ go, back }) {
               Search manually instead
             </button>
           </div>
-        </>
+        </div>
       ) : (
         <Scroll>
           <div style={{ position: "relative", marginBottom: 16 }}>
