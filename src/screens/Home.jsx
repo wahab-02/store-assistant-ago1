@@ -37,7 +37,7 @@ function Home({ go }) {
       <StatusBar />
       <Scroll>
         <div style={{
-          padding: "6px 4px 20px",
+          padding: "18px 4px 20px",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "flex-start"
