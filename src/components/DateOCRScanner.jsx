@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { B, T1, G, T2 } from "../constants/colors";
-import { createWorker } from "tesseract.js";
+
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
 function DateOCRScanner({ onDateScanned, onClose }) {
   const videoRef = useRef(null);
@@ -43,11 +45,11 @@ function DateOCRScanner({ onDateScanned, onClose }) {
     return canvas.toDataURL("image/jpeg", 0.75).split(",")[1];
   };
 
-  const scanWithOCR = async () => {
+  const scanWithGemini = async () => {
     if (scanningRef.current) return;
     scanningRef.current = true;
     setIsProcessing(true);
-    setDetectedText("Reading text…");
+    setDetectedText("Preparing image…");
 
     try {
       const canvas = canvasRef.current;
@@ -105,70 +107,113 @@ function DateOCRScanner({ onDateScanned, onClose }) {
       
       croppedCtx.putImageData(imageData, 0, 0);
 
-      // Run Tesseract OCR on cropped area only
-      setDetectedText("Analyzing image…");
+      // Convert cropped canvas to base64 for Gemini
+      const base64Image = croppedCanvas.toDataURL("image/jpeg", 0.85).split(",")[1];
       
-      const worker = await createWorker("eng", 1, {
-        logger: m => {
-          if (m.status === 'recognizing text') {
-            setDetectedText(`Reading: ${Math.round(m.progress * 100)}%`);
-          }
-        }
-      });
-      
-      // Configure for both printed and handwritten text
-      await worker.setParameters({
-        tessedit_char_whitelist: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz/-:. ',
-        tessedit_pageseg_mode: '6', // Assume uniform block of text
-      });
-      
-      const { data } = await worker.recognize(croppedCanvas);
-      await worker.terminate();
-      
-      const text = data.text;
-      console.log("OCR text:", text);
+      setDetectedText("Asking Gemini AI…");
 
-      if (!text) {
-        setDetectedText("No text found — try again");
+      // Call Gemini Vision API
+      const requestBody = {
+        contents: [{
+          parts: [
+            {
+              text: `You are an expert at reading expiry dates, best-before dates, use-by dates, and EXP dates from product packaging.
+
+Analyze this image and find ANY expiry-related date. Look for:
+- "Best Before", "Best-Before", "BB"
+- "Use By", "Use-By"
+- "Expiry", "EXP", "Expires"
+- "Sell By"
+- Any date printed near these labels
+- Dates in formats: DD/MM/YYYY, DD-MM-YYYY, DD.MM.YYYY, MMM DD YYYY, etc.
+- Both printed AND handwritten dates
+
+IMPORTANT: If the year looks unrealistic (like 2077, 2066, 2088), it's likely OCR misread a digit. The last digit is usually correct (e.g., 2077 should be 2027).
+
+Reply with ONLY valid JSON (no markdown, no code blocks):
+{
+  "found": true,
+  "day": 15,
+  "month": 5,
+  "year": 2027,
+  "raw": "15/05/2027",
+  "confidence": "high"
+}
+
+If no date found:
+{"found": false}
+
+Rules:
+- month must be 1-12
+- day must be 1-31
+- year must be 4 digits (2024-2030 range is normal for food)
+- raw is the exact text as shown in image`
+            },
+            {
+              inline_data: {
+                mime_type: "image/jpeg",
+                data: base64Image
+              }
+            }
+          ]
+        }],
+        generationConfig: {
+          temperature: 0.1,
+          maxOutputTokens: 500,
+          responseMimeType: "application/json"
+        }
+      };
+
+      const response = await fetch(GEMINI_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(requestBody)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error("Gemini API error:", response.status, errorData);
+        
+        if (response.status === 429) {
+          const retryAfter = errorData?.error?.details?.find(d => d["@type"]?.includes("RetryInfo"))?.retryDelay?.replace("s", "");
+          setDetectedText(`Rate limit. Wait ${retryAfter || "a moment"} and try again`);
+        } else {
+          setDetectedText(`API error ${response.status}. Try again`);
+        }
         return;
       }
 
-      // Date patterns to match
-      const patterns = [
-        // DD/MM/YYYY, DD-MM-YYYY, DD.MM.YYYY
-        /\b(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})\b/g,
-        // MM/DD/YYYY, MM-DD-YYYY, MM.DD.YYYY (ambiguous)
-        /\b(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})\b/g,
-        // YYYY-MM-DD, YYYY/MM/DD, YYYY.MM.DD
-        /\b(\d{4})[\/\-\.](\d{1,2})[\/\-\.](\d{1,2})\b/g,
-        // DD MMM YYYY, DD MMMM YYYY
-        /\b(\d{1,2})\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|January|February|March|April|May|June|July|August|September|October|November|December)[a-z]*\s+(\d{2,4})\b/gi,
-        // MMM DD YYYY, MMMM DD YYYY
-        /\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|January|February|March|April|May|June|July|August|September|October|November|December)[a-z]*\s+(\d{1,2})[,\s]+(\d{2,4})\b/gi,
-        // EXP: DD/MM/YYYY or similar
-        /EXP[:\s]+(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})/gi,
-        // USE BY, BEST BEFORE, etc.
-        /(USE BY|BEST BEFORE|EXPIRY|EXP)[:\s]+(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})/gi,
-      ];
+      const data = await response.json();
+      const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+      console.log("Gemini full response:", data);
+      console.log("Gemini text:", rawText);
 
-      let foundDate = null;
-      let rawMatch = "";
-
-      for (const pattern of patterns) {
-        const match = pattern.exec(text);
-        if (match) {
-          rawMatch = match[0];
-          foundDate = parseDateFromMatch(match, pattern);
-          if (foundDate) break;
+      // Parse JSON from response
+      let result;
+      try {
+        // Try direct JSON parse first (with responseMimeType: "application/json")
+        result = JSON.parse(rawText);
+      } catch (e) {
+        // Fallback: extract JSON from text
+        const jsonMatch = rawText.match(/\{[\s\S]*?\}/);
+        if (!jsonMatch) {
+          console.error("No JSON found in response:", rawText);
+          setDetectedText("Unexpected response — try again");
+          return;
         }
+        result = JSON.parse(jsonMatch[0]);
       }
 
-      if (!foundDate) {
+      if (!result.found) {
         setDetectedText("No date found — try again");
         return;
       }
 
-      let { day, month, year } = foundDate;
+      // Extract date from Gemini response
+      let { day, month, year } = result;
+      const rawMatch = result.raw || `${day}/${month}/${year}`;
       
       // Fix common OCR year mistakes (e.g., 2077 -> 2027, 2066 -> 2026)
       // Food expiry dates are typically within 1-5 years from now
@@ -233,70 +278,6 @@ function DateOCRScanner({ onDateScanned, onClose }) {
     }
   };
 
-  const parseDateFromMatch = (match, pattern) => {
-    const monthMap = {
-      jan: 1, january: 1,
-      feb: 2, february: 2,
-      mar: 3, march: 3,
-      apr: 4, april: 4,
-      may: 5,
-      jun: 6, june: 6,
-      jul: 7, july: 7,
-      aug: 8, august: 8,
-      sep: 9, september: 9,
-      oct: 10, october: 10,
-      nov: 11, november: 11,
-      dec: 12, december: 12,
-    };
-
-    // Check if pattern includes month names
-    const hasMonthName = match.some(m => typeof m === 'string' && isNaN(m) && monthMap[m.toLowerCase()]);
-
-    if (hasMonthName) {
-      // DD MMM YYYY or MMM DD YYYY format
-      let day, month, year;
-      for (let i = 1; i < match.length; i++) {
-        const part = match[i];
-        if (isNaN(part) && monthMap[part.toLowerCase()]) {
-          month = monthMap[part.toLowerCase()];
-        } else if (!isNaN(part)) {
-          const num = parseInt(part);
-          if (num > 31 || (year && !day)) {
-            year = num < 100 ? 2000 + num : num;
-          } else if (!day) {
-            day = num;
-          } else if (!year) {
-            year = num < 100 ? 2000 + num : num;
-          }
-        }
-      }
-      return { day, month, year };
-    }
-
-    // Numeric formats
-    const nums = match.slice(1).map(n => parseInt(n));
-    
-    // YYYY-MM-DD format (year first)
-    if (nums[0] > 31) {
-      const year = nums[0] < 100 ? 2000 + nums[0] : nums[0];
-      return { day: nums[2], month: nums[1], year };
-    }
-
-    // DD/MM/YYYY or MM/DD/YYYY (ambiguous)
-    // Assume DD/MM/YYYY (European/international standard)
-    const day = nums[0];
-    const month = nums[1];
-    let year = nums[2];
-    if (year < 100) year += 2000;
-
-    // Swap if month > 12 (must be DD/MM format)
-    if (month > 12) {
-      return { day: month, month: day, year };
-    }
-
-    return { day, month, year };
-  };
-
   const accentColor = status === "found" ? G : isProcessing ? "#FFA500" : B;
 
   return (
@@ -353,7 +334,7 @@ function DateOCRScanner({ onDateScanned, onClose }) {
           }}>
             {status === "initializing" && "Starting camera…"}
             {status === "ready" && !isProcessing && "Align date inside the box"}
-            {status === "ready" && isProcessing && "⏳ Reading text…"}
+            {status === "ready" && isProcessing && "⏳ Reading with Gemini AI…"}
             {status === "found" && "✓ Date captured!"}
             {status === "error" && "⚠ Camera unavailable"}
           </div>
@@ -385,7 +366,7 @@ function DateOCRScanner({ onDateScanned, onClose }) {
       <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 14 }}>
         {status === "ready" && (
           <button
-            onClick={scanWithOCR}
+            onClick={scanWithGemini}
             disabled={isProcessing}
             className={isProcessing ? "" : "press"}
             style={{
