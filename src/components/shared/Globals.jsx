@@ -16,6 +16,7 @@ const Globals = () => (
     .press:active { transform:scale(0.95); opacity:0.8; transition: transform 0.1s, opacity 0.1s; }
     @keyframes drawCheck { 0% { stroke-dashoffset: 100; opacity: 0; } 100% { stroke-dashoffset: 0; opacity: 1; } }
     @keyframes shimmerglow { 0% { transform: translateX(-150%) skewX(-15deg); } 40%, 100% { transform: translateX(200%) skewX(-15deg); } }
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
     ::-webkit-scrollbar { width:0; }
     input:focus, textarea:focus { outline:none; }
   `}</style>

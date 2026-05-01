@@ -24,7 +24,7 @@ function RMDashboard() {
   const kpis = [
     { l: "Active promotions", v: "4", s: "+2 since 9am", c: B },
     { l: "Total reached", v: "324", s: "Across 4 stores", c: T1 },
-    { l: "Total claims", v: "113", s: "35% avg rate", c: G },
+    { l: "Total conversions", v: "113", s: "35% avg rate", c: G },
     { l: "Budget used", v: "68%", s: "£340 of £500", c: AM },
   ];
 
@@ -193,7 +193,7 @@ function RMDashboard() {
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ borderBottom: `1px solid ${SEP}` }}>
-                  {["Store", "Product", "Discount", "Best Before", "Cap", "Ends", "Reached", "Claims", "Rate", "Status", ""].map(h => (
+                  {["Store", "Product", "Discount", "Best Before", "Cap", "Ends", "Reached", "Conversions", "Rate", "Status", ""].map(h => (
                     <TH key={h}>{h}</TH>
                   ))}
                 </tr>

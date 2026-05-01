@@ -39,7 +39,7 @@ function QCDetails({ go, back }) {
             }}
           />
           <div style={{ fontSize: 13, color: T2, marginTop: 8 }}>
-            Promotion ends automatically when this many units are claimed.
+            Promotion ends automatically when this many units are converted.
           </div>
         </Card>
         

@@ -19,6 +19,12 @@ function CommsWrite({ go, back }) {
     "It's going to be a warm one this weekend — ice creams on the front counter, grab one on the way out!",
     "The Riverside Mermaids made it to the finals — we're all cheering for you. Go Mermaids!",
     "We're donating £1 to the Riverside food bank for every £30 spent today. Thanks for helping out.",
+    "Cold weather tonight ❄️ Grab soup, cocoa, and bakery favorites.",
+    "Game day ready? 🏈 Don't forget snacks and drinks.",
+    "Happy 50th birthday to Steve at checkout 🎉 Say hi if you see him.",
+    "Fresh pastries just came out ☀️ Bakery is stocked and warm.",
+    "Traffic is busy downtown today 🚗 Great time to grab dinner essentials.",
+    "Fresh produce specials today 🥗 Check aisle 2.",
   ];
 
   if (sent) {
@@ -142,29 +148,43 @@ function CommsWrite({ go, back }) {
           </div>
         )}
 
-        {!msg.trim() && (
-          <div className="anim d1">
-            <Label>Inspiration</Label>
+        <div className="anim d1">
+          <Label>Inspiration</Label>
+          <div style={{ position: "relative" }}>
             <Card>
-              {examples.map((e, i) => (
-                <div key={i}>
-                  <button className="press" onClick={() => setMsg(e)}
-                    style={{
-                      display: "block",
-                      width: "100%",
-                      padding: "16px 20px",
-                      background: "none",
-                      border: "none",
-                      textAlign: "left"
-                    }}>
-                    <div style={{ fontSize: 14, color: T1, lineHeight: 1.6 }}>{e}</div>
-                  </button>
-                  {i < examples.length - 1 && <Divider />}
-                </div>
-              ))}
+              <div style={{ maxHeight: 260, overflowY: "auto", WebkitOverflowScrolling: "touch" }}>
+                {examples.map((e, i) => (
+                  <div key={i}>
+                    <button className="press" onClick={() => setMsg(e)}
+                      style={{
+                        display: "block",
+                        width: "100%",
+                        padding: "16px 20px",
+                        background: "none",
+                        border: "none",
+                        textAlign: "left",
+                        opacity: msg === e ? 0.4 : 1,
+                        transition: "opacity 0.2s"
+                      }}>
+                      <div style={{ fontSize: 14, color: T1, lineHeight: 1.6 }}>{e}</div>
+                    </button>
+                    {i < examples.length - 1 && <Divider />}
+                  </div>
+                ))}
+              </div>
             </Card>
+            <div style={{
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: 48,
+              borderRadius: "0 0 18px 18px",
+              background: "linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0.95))",
+              pointerEvents: "none"
+            }} />
           </div>
-        )}
+        </div>
 
         <Spacer height={16} />
         <Label>Audience</Label>

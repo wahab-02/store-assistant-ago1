@@ -178,7 +178,7 @@ function QCReview({ go, back }) {
             fontWeight: 700,
             color: "#fff"
           }}>
-            Claim offer
+            Convert offer
           </div>
         </div>
 

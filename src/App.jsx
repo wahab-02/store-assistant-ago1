@@ -14,6 +14,7 @@ import QCStatus from "./screens/QCStatus";
 import CommsWrite from "./screens/CommsWrite";
 import CommsActive from "./screens/CommsActive";
 import RMDashboard from "./screens/RMDashboard";
+import EndedPromotions from "./screens/EndedPromotions";
 
 
 export default function App() {
@@ -59,6 +60,8 @@ export default function App() {
         return <CommsActive {...p} />;
       case "rm-dashboard":
         return <RMDashboard />;
+      case "ended-promotions":
+        return <EndedPromotions {...p} />;
       default:
         return <Home {...p} />;
     }

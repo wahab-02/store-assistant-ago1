@@ -5,7 +5,7 @@ import Scroll from "../components/layout/Scroll";
 import Pill from "../components/shared/Pill";
 import Button from "../components/shared/Button";
 import Spacer from "../components/shared/Spacer";
-import { DK_BG, DK_T1, DK_T2, DK_C, DK_C2, DK_SEP, G } from "../constants/colors";
+import { DK_BG, DK_T1, DK_T2, DK_C, DK_C2, G } from "../constants/colors";
 import { useProduct } from "../context/ProductContext";
 
 function QCStatus({ go, back }) {
@@ -13,6 +13,7 @@ function QCStatus({ go, back }) {
   const [reached, setReached] = useState(127);
   const [claims, setClaims] = useState(42);
   const [ended, setEnded] = useState(false);
+  const [showEndDrawer, setShowEndDrawer] = useState(false);
   
   // Use actual product or fallback
   const product = currentProduct || {
@@ -41,12 +42,6 @@ function QCStatus({ go, back }) {
   }, [ended]);
 
   const rate = reached > 0 ? Math.round((claims / reached) * 100) : 0;
-  
-  const history = [
-    { n: "Warburtons White 800g", d: "£0.80 off", r: "35%", a: "Yesterday" },
-    { n: "Innocent Smoothie 750ml", d: "25% off", r: "40%", a: "2 days ago" },
-    { n: "Cathedral City 350g", d: "£2.00 off", r: "28%", a: "3 days ago" }
-  ];
 
   return (
     <div style={{
@@ -68,6 +63,108 @@ function QCStatus({ go, back }) {
         )}
       />
       
+      {showEndDrawer && (
+        <>
+          <div
+            onClick={() => setShowEndDrawer(false)}
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "rgba(0,0,0,0.55)",
+              zIndex: 100,
+              animation: "fadeIn 0.2s both"
+            }}
+          />
+          <div style={{
+            position: "fixed",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            zIndex: 101,
+            background: "#1C1C1E",
+            borderRadius: "28px 28px 0 0",
+            padding: "12px 24px 44px",
+            animation: "slideUp 0.32s cubic-bezier(0.22,1,0.36,1) both"
+          }}>
+            <div style={{
+              width: 36,
+              height: 4,
+              borderRadius: 2,
+              background: "rgba(255,255,255,0.15)",
+              margin: "0 auto 28px"
+            }} />
+            <div style={{
+              width: 52,
+              height: 52,
+              borderRadius: 26,
+              background: "rgba(255,59,48,0.12)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              marginBottom: 18
+            }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FF453A" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+            </div>
+            <div style={{
+              fontSize: 20,
+              fontWeight: 700,
+              color: DK_T1,
+              letterSpacing: "-0.4px",
+              marginBottom: 8
+            }}>
+              End this promotion?
+            </div>
+            <div style={{
+              fontSize: 15,
+              color: DK_T2,
+              lineHeight: 1.6,
+              marginBottom: 28
+            }}>
+              This will stop the promotion immediately. Shoppers who have already converted will still be able to redeem at the till.
+            </div>
+            <button
+              className="press"
+              onClick={() => { setEnded(true); setShowEndDrawer(false); }}
+              style={{
+                width: "100%",
+                padding: "16px",
+                background: "#FF453A",
+                border: "none",
+                borderRadius: 18,
+                color: "#fff",
+                fontSize: 16,
+                fontWeight: 700,
+                marginBottom: 10,
+                cursor: "pointer"
+              }}
+            >
+              Yes, end promotion
+            </button>
+            <button
+              className="press"
+              onClick={() => setShowEndDrawer(false)}
+              style={{
+                width: "100%",
+                padding: "16px",
+                background: "rgba(255,255,255,0.07)",
+                border: "none",
+                borderRadius: 18,
+                color: DK_T1,
+                fontSize: 16,
+                fontWeight: 600,
+                cursor: "pointer"
+              }}
+            >
+              Keep it running
+            </button>
+          </div>
+        </>
+      )}
+
       <Scroll style={{ padding: "0 20px 28px" }}>
         <div style={{ marginBottom: 24 }} className="anim">
           <div style={{
@@ -97,11 +194,11 @@ function QCStatus({ go, back }) {
           }}>
             {[
               { v: reached, l: "Reached" },
-              { v: claims, l: "Claims" },
+              { v: claims, l: "Conversions" },
               { v: rate + "%", l: "Rate" }
             ].map((m, i) => (
               <div key={i} style={{
-                borderRight: i < 2 ? `1px solid ${DK_SEP}` : "none",
+                borderRight: i < 2 ? "1px solid rgba(255,255,255,0.08)" : "none",
                 padding: "0 4px",
                 textAlign: "center"
               }}>
@@ -191,7 +288,7 @@ function QCStatus({ go, back }) {
 
         <div className="anim d3" style={{ marginBottom: 24 }}>
           {!ended ? (
-            <button className="press" onClick={() => setEnded(true)}
+            <button className="press" onClick={() => setShowEndDrawer(true)}
               style={{
                 width: "100%",
                 padding: "15px",
@@ -220,64 +317,13 @@ function QCStatus({ go, back }) {
                 Promotion ended
               </div>
               <div style={{ fontSize: 14, color: DK_T2 }}>
-                Final: {claims} claims · {rate}% rate
+                Final: {claims} conversions · {rate}% rate
               </div>
             </div>
           )}
         </div>
 
-        <div style={{
-          fontSize: 17,
-          fontWeight: 700,
-          color: DK_T1,
-          marginBottom: 12,
-          letterSpacing: "-0.3px"
-        }}>
-          Last 7 Days
-        </div>
-        
-        <div style={{ background: DK_C, borderRadius: 18 }}>
-          {history.map((h, i) => (
-            <div key={i}>
-              <div style={{
-                padding: "16px 20px",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center"
-              }}>
-                <div>
-                  <div style={{
-                    fontSize: 14,
-                    fontWeight: 600,
-                    color: DK_T1,
-                    marginBottom: 2
-                  }}>
-                    {h.n}
-                  </div>
-                  <div style={{ fontSize: 13, color: DK_T2 }}>
-                    {h.d} · {h.a}
-                  </div>
-                </div>
-                <div style={{ textAlign: "right" }}>
-                  <div style={{
-                    fontSize: 20,
-                    fontWeight: 700,
-                    color: G,
-                    letterSpacing: "-0.8px"
-                  }}>
-                    {h.r}
-                  </div>
-                  <div style={{ fontSize: 11, color: DK_T2 }}>claim rate</div>
-                </div>
-              </div>
-              {i < history.length - 1 && (
-                <div style={{ height: 1, background: DK_SEP, margin: "0 20px" }} />
-              )}
-            </div>
-          ))}
-        </div>
-        
-        <Spacer height={20} />
+        <Spacer height={4} />
         <Button v="dark" onClick={() => go("qc-scan")}>+ New Promotion</Button>
       </Scroll>
     </div>

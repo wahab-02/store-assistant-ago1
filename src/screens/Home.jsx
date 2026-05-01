@@ -9,23 +9,43 @@ import { useProduct } from "../context/ProductContext";
 function Home({ go }) {
   const { currentProduct } = useProduct();
   
+  const basePromotions = [
+    { n: "Yeo Valley Yoghurt 500g",       d: "20% off",   r: 127, c: 42, rt: 33 },
+    { n: "Warburtons White 800g",          d: "£0.80 off", r: 89,  c: 31, rt: 35 },
+    { n: "Innocent Smoothie 750ml",        d: "25% off",   r: 104, c: 38, rt: 37 },
+    { n: "Cathedral City 350g",            d: "£2.00 off", r: 76,  c: 21, rt: 28 },
+    { n: "Lurpak Butter 250g",             d: "£1.00 off", r: 58,  c: 17, rt: 29 },
+    { n: "Heinz Baked Beans 415g",         d: "3 for £2",  r: 143, c: 61, rt: 43 },
+    { n: "Müller Corner Yoghurt",          d: "4 for £3",  r: 91,  c: 44, rt: 48 },
+    { n: "Hovis Granary 800g",             d: "£0.50 off", r: 67,  c: 24, rt: 36 },
+    { n: "Tropicana Orange 1L",            d: "20% off",   r: 83,  c: 29, rt: 35 },
+    { n: "Activia Yoghurt 4-Pack",         d: "£1.50 off", r: 72,  c: 26, rt: 36 },
+    { n: "Flora Margarine 500g",           d: "£0.75 off", r: 49,  c: 14, rt: 29 },
+    { n: "Kellogg's Corn Flakes 500g",     d: "25% off",   r: 98,  c: 40, rt: 41 },
+    { n: "McVitie's Digestives 400g",      d: "£0.60 off", r: 115, c: 52, rt: 45 },
+    { n: "Anchor Cheddar 400g",            d: "£1.25 off", r: 64,  c: 20, rt: 31 },
+    { n: "Ella's Kitchen Pouch",           d: "3 for £4",  r: 37,  c: 18, rt: 49 },
+    { n: "Oat So Simple Original 8-Pk",   d: "20% off",   r: 88,  c: 35, rt: 40 },
+    { n: "Robinsons Squash 1L",            d: "£0.80 off", r: 55,  c: 19, rt: 35 },
+    { n: "Cadbury Dairy Milk 200g",        d: "£1.00 off", r: 162, c: 74, rt: 46 },
+    { n: "Pringles Original 200g",         d: "2 for £3",  r: 139, c: 63, rt: 45 },
+    { n: "Ribena Blackcurrant 1L",         d: "£0.70 off", r: 44,  c: 15, rt: 34 },
+  ];
+
   // Build active promotions list - if product was scanned, show it first
   const activePromotions = currentProduct
     ? [
-        { 
-          n: currentProduct.name || "Product", 
-          d: "20% off", 
-          r: 127, 
-          c: 42, 
+        {
+          n: currentProduct.name || "Product",
+          d: "20% off",
+          r: 127,
+          c: 42,
           rt: 33,
           image: currentProduct.image
         },
-        { n: "Warburtons White 800g", d: "£0.80 off", r: 89, c: 31, rt: 35 }
+        ...basePromotions.slice(1)
       ]
-    : [
-        { n: "Yeo Valley Yoghurt 500g", d: "20% off", r: 127, c: 42, rt: 33 },
-        { n: "Warburtons White 800g", d: "£0.80 off", r: 89, c: 31, rt: 35 }
-      ];
+    : basePromotions;
   return (
     <div style={{
       display: "flex",
@@ -185,12 +205,12 @@ function Home({ go }) {
             Active
           </span>
           <Pill color={G} style={{ background: "rgba(48,209,88,0.12)" }}>
-            ● 2 live
+            ● 20 live
           </Pill>
         </div>
 
         {activePromotions.map((p, i) => (
-          <div key={i} className={`anim d${i + 3}`} style={{ marginBottom: 12 }}>
+          <div key={i} className={`anim d${Math.min(i + 3, 4)}`} style={{ marginBottom: 12 }}>
             <div onClick={() => go("qc-status")} className="press" style={{
               background: "#fff",
               borderRadius: 24,
@@ -268,7 +288,7 @@ function Home({ go }) {
               }}>
                 {[
                   { v: p.r, l: "Reached" },
-                  { v: p.c, l: "Claims" },
+                  { v: p.c, l: "Conversions" },
                   { v: p.rt + "%", l: "Rate" }
                 ].map((m, j) => (
                   <div key={j} style={{
@@ -301,39 +321,20 @@ function Home({ go }) {
         ))}
 
         <Spacer height={8} />
-        <div style={{
-          fontSize: 20,
-          fontWeight: 700,
-          color: T1,
-          letterSpacing: "-0.5px",
-          marginBottom: 12
-        }} className="anim d4">
-          Ended
-        </div>
-        <div style={{
-          background: "rgba(255,255,255,0.6)",
-          borderRadius: 20,
-          padding: "16px 20px",
-          border: "1.5px dashed rgba(0,0,0,0.08)",
-          marginBottom: 28
-        }} className="anim d4">
-          <div style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center"
+        <div className="anim d4" style={{ marginBottom: 28, textAlign: "center" }}>
+          <button className="press" onClick={() => go("ended-promotions")} style={{
+            background: "none",
+            border: "none",
+            fontSize: 14,
+            color: T3,
+            cursor: "pointer",
+            padding: "4px 0",
+            textDecoration: "underline",
+            textDecorationColor: "rgba(132,122,158,0.4)",
+            textUnderlineOffset: 3
           }}>
-            <div>
-              <div style={{ fontSize: 15, fontWeight: 600, color: T2 }}>
-                Innocent Smoothie 750ml
-              </div>
-              <div style={{ fontSize: 13, color: T3, marginTop: 2 }}>
-                25% off · 40% claim rate
-              </div>
-            </div>
-            <Pill color={T2} style={{ background: "rgba(0,0,0,0.05)" }}>
-              Ended
-            </Pill>
-          </div>
+            View ended promotions
+          </button>
         </div>
 
         <div style={{

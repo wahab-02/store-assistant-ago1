@@ -3,8 +3,22 @@ import StatusBar from "../components/layout/StatusBar";
 import NavBar from "../components/layout/NavBar";
 import Scroll from "../components/layout/Scroll";
 import Button from "../components/shared/Button";
-import Pill from "../components/shared/Pill";
+import Divider from "../components/shared/Divider";
+import Label from "../components/shared/Label";
+import Card from "../components/shared/Card";
 import { BG, T1, T2, T3, G } from "../constants/colors";
+
+const examples = [
+  "It's going to be a warm one this weekend — ice creams on the front counter, grab one on the way out!",
+  "The Riverside Mermaids made it to the finals — we're all cheering for you. Go Mermaids!",
+  "We're donating £1 to the Riverside food bank for every £30 spent today. Thanks for helping out.",
+  "Cold weather tonight ❄️ Grab soup, cocoa, and bakery favorites.",
+  "Game day ready? 🏈 Don't forget snacks and drinks.",
+  "Happy 50th birthday to Steve at checkout 🎉 Say hi if you see him.",
+  "Fresh pastries just came out ☀️ Bakery is stocked and warm.",
+  "Traffic is busy downtown today 🚗 Great time to grab dinner essentials.",
+  "Fresh produce specials today 🥗 Check aisle 2.",
+];
 
 function CommsActive({ go, back }) {
   const [removed, setRemoved] = useState(false);
@@ -114,7 +128,41 @@ function CommsActive({ go, back }) {
             <Button v="danger" onClick={() => setRemoved(true)} style={{ marginBottom: 12 }}>
               Remove message
             </Button>
-            <Button onClick={() => go("comms-write")}>Write a new message</Button>
+            <Button onClick={() => go("comms-write")} style={{ marginBottom: 28 }}>Write a new message</Button>
+
+            <Label>Inspiration</Label>
+            <div style={{ position: "relative" }}>
+              <Card>
+                <div style={{ maxHeight: 260, overflowY: "auto", WebkitOverflowScrolling: "touch" }}>
+                  {examples.map((e, i) => (
+                    <div key={i}>
+                      <button className="press" onClick={() => go("comms-write")}
+                        style={{
+                          display: "block",
+                          width: "100%",
+                          padding: "16px 20px",
+                          background: "none",
+                          border: "none",
+                          textAlign: "left"
+                        }}>
+                        <div style={{ fontSize: 14, color: T1, lineHeight: 1.6 }}>{e}</div>
+                      </button>
+                      {i < examples.length - 1 && <Divider />}
+                    </div>
+                  ))}
+                </div>
+              </Card>
+              <div style={{
+                position: "absolute",
+                bottom: 0,
+                left: 0,
+                right: 0,
+                height: 48,
+                borderRadius: "0 0 18px 18px",
+                background: "linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0.95))",
+                pointerEvents: "none"
+              }} />
+            </div>
           </>
         )}
       </Scroll>
