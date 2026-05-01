@@ -1,6 +1,5 @@
 import { useState } from "react";
 import Globals from "./components/shared/Globals";
-import { B, T1 } from "./constants/colors";
 import { ProductProvider } from "./context/ProductContext";
 
 // Import all screen components
@@ -89,52 +88,6 @@ export default function App() {
         display: "flex",
         flexDirection: "column"
       }}>
-        {/* Navigation strip */}
-        <div style={{
-          background: "#111",
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
-          padding: "10px 20px",
-          display: "flex",
-          alignItems: "center",
-          gap: 6,
-          flexWrap: "wrap"
-        }}>
-          <span style={{
-            fontSize: 10,
-            color: "rgba(255,255,255,0.18)",
-            fontWeight: 700,
-            textTransform: "uppercase",
-            letterSpacing: "1px",
-            marginRight: 6,
-            flexShrink: 0
-          }}>
-            Prototype
-          </span>
-          {NAV.map((s) => (
-            <button
-              key={s.id}
-              onClick={() => go(s.id)}
-              style={{
-                padding: "5px 11px",
-                borderRadius: 6,
-                border: "none",
-                background: screen === s.id
-                  ? s.g === "rm"
-                    ? T1
-                    : B
-                  : "rgba(255,255,255,0.06)",
-                color: screen === s.id ? "#fff" : "rgba(255,255,255,0.3)",
-                fontSize: 11,
-                fontWeight: screen === s.id ? 700 : 400,
-                cursor: "pointer",
-                transition: "all 0.15s",
-                letterSpacing: "-0.1px"
-              }}
-            >
-              {s.l}
-            </button>
-          ))}
-        </div>
 
         {/* Content */}
         <div style={{
@@ -215,14 +168,6 @@ export default function App() {
                   <div key={i} style={s[0]} />
                 ))}
                 {render()}
-              </div>
-              <div style={{
-                fontSize: 11,
-                color: "rgba(255,255,255,0.18)",
-                fontWeight: 500,
-                letterSpacing: "0.2px"
-              }}>
-                {NAV.find((s) => s.id === screen)?.l} · tap elements to navigate
               </div>
             </div>
           )}
