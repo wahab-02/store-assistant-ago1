@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { B, T1, G, T2 } from "../constants/colors";
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
 function DateOCRScanner({ onDateScanned, onClose }) {
   const videoRef = useRef(null);
@@ -52,12 +52,6 @@ function DateOCRScanner({ onDateScanned, onClose }) {
     setDetectedText("Preparing image…");
 
     try {
-      // Check if API key is available
-      if (!GEMINI_API_KEY) {
-        console.error("Gemini API key not found in environment variables");
-        setDetectedText("Configuration error — API key missing");
-        return;
-      }
       const canvas = canvasRef.current;
       if (!canvas) {
         setDetectedText("Camera not ready");
@@ -165,7 +159,8 @@ Rules:
         }],
         generationConfig: {
           temperature: 0.1,
-          maxOutputTokens: 500
+          maxOutputTokens: 500,
+          responseMimeType: "application/json"
         }
       };
 
@@ -179,19 +174,11 @@ Rules:
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        console.error("Gemini API error:", {
-          status: response.status,
-          statusText: response.statusText,
-          errorData,
-          apiKeyPresent: !!GEMINI_API_KEY,
-          apiKeyPrefix: GEMINI_API_KEY?.substring(0, 10)
-        });
+        console.error("Gemini API error:", response.status, errorData);
         
         if (response.status === 429) {
           const retryAfter = errorData?.error?.details?.find(d => d["@type"]?.includes("RetryInfo"))?.retryDelay?.replace("s", "");
           setDetectedText(`Rate limit. Wait ${retryAfter || "a moment"} and try again`);
-        } else if (response.status === 403) {
-          setDetectedText(`API key error. Check environment variables`);
         } else {
           setDetectedText(`API error ${response.status}. Try again`);
         }
