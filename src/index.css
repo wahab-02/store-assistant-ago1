@@ -5,6 +5,12 @@ html, body, #root {
   overflow: hidden;
 }
 
+/* Ensure every screen fills its container and allows inner scroll */
+#root > div > div {
+  min-height: 0;
+}
+
+/* Scandit camera fills container */
 .scandit-scanner-root video,
 .scandit-scanner-root canvas {
   width: 100% !important;

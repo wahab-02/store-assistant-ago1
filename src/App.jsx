@@ -68,7 +68,9 @@ export default function App() {
     <ProductProvider>
       <Globals />
       <div style={{ height: "100%", display: "flex", flexDirection: "column", overflow: "hidden" }}>
-        {render()}
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", minHeight: 0 }}>
+          {render()}
+        </div>
       </div>
     </ProductProvider>
   );
